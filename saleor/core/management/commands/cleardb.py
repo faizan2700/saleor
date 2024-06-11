@@ -43,76 +43,100 @@ class Command(BaseCommand):
         if not settings.DEBUG and not force:
             raise CommandError("Cannot clear the database in DEBUG=False mode.")
 
+        count_checkout_objs = Checkout.objects.all().count() 
         Checkout.objects.all().delete()
-        self.stdout.write("Removed checkouts")
+        self.stdout.write(f"Removed checkouts, total: {count_checkout_objs}")
 
+        transaction_item_objs = TransactionItem.objects.all().count() 
         TransactionItem.objects.all().delete()
-        self.stdout.write("Removed transaction items")
+        self.stdout.write(f"Removed transaction items, total: {transaction_item_objs}")
 
+        transaction_objs = Transaction.objects.all().count() 
         Transaction.objects.all().delete()
-        self.stdout.write("Removed transactions")
+        self.stdout.write(f"Removed transactions, total: {transaction_objs}")
 
+        payment_objs = Payment.objects.all().count() 
         Payment.objects.all().delete()
-        self.stdout.write("Removed payments")
+        self.stdout.write(f"Removed payments, total: {payment_objs}")
 
+        order_objs = Order.objects.all().count() 
         Order.objects.all().delete()
-        self.stdout.write("Removed orders")
-
+        self.stdout.write(f"Removed orders, total: {order_objs}")
+        
+        product_objs = Product.objects.all().count() 
         Product.objects.all().delete()
-        self.stdout.write("Removed products")
+        self.stdout.write(f"Removed products, total: {product_objs}")
 
+        product_type_objs = ProductType.objects.all().count() 
         ProductType.objects.all().delete()
-        self.stdout.write("Removed product types")
+        self.stdout.write(f"Removed product types, total: {product_type_objs}")
 
+        attribute_objs = Attribute.objects.all().count() 
         Attribute.objects.all().delete()
-        self.stdout.write("Removed attributes")
+        self.stdout.write(f"Removed attributes, total: {attribute_objs}")
 
+        category_objs = Category.objects.all().count() 
         Category.objects.all().delete()
-        self.stdout.write("Removed categories")
+        self.stdout.write(f"Removed categories, total: {category_objs}")
 
+        collection_objs = Collection.objects.all().count() 
         Collection.objects.all().delete()
-        self.stdout.write("Removed collections")
+        self.stdout.write(f"Removed collections, total: {collection_objs}")
 
+        promotion_objs = Promotion.objects.all().count() 
         Promotion.objects.all().delete()
-        self.stdout.write("Removed promotions")
+        self.stdout.write(f"Removed promotions, total: {promotion_objs}")
 
+        shipping_method_objs = ShippingMethod.objects.all().count() 
         ShippingMethod.objects.all().delete()
-        self.stdout.write("Removed shipping methods")
+        self.stdout.write(f"Removed shipping methods, total: {shipping_method_objs}")
 
+        shipping_zone_objs = ShippingZone.objects.all().count() 
         ShippingZone.objects.all().delete()
-        self.stdout.write("Removed shipping zones")
+        self.stdout.write(f"Removed shipping zones, total: {shipping_zone_objs}")
 
+        voucher_objs = Voucher.objects.all().count() 
         Voucher.objects.all().delete()
-        self.stdout.write("Removed vouchers")
+        self.stdout.write(f"Removed vouchers, total: {voucher_objs}")
 
+        giftcard_objs = GiftCard.objects.all().count() 
         GiftCard.objects.all().delete()
-        self.stdout.write("Removed gift cards")
+        self.stdout.write(f"Removed gift cards, total: {giftcard_objs}")
 
-        self.stdout.write("Removed warehouses")
+        warehouse_objs = Warehouse.objects.all().count() 
+        self.stdout.write(f"Removed warehouses, total: {warehouse_objs}")
         Warehouse.objects.all().delete()
 
+        page_objs = Page.objects.all().count() 
         Page.objects.all().delete()
-        self.stdout.write("Removed pages")
+        self.stdout.write(f"Removed pages, total: {page_objs}")
 
+        page_type_objs = PageType.objects.all().count() 
         PageType.objects.all().delete()
-        self.stdout.write("Removed page types")
+        self.stdout.write(f"Removed page types, total: {page_type_objs}")
 
+        webhook_objs = Webhook.objects.all().count() 
         Webhook.objects.all().delete()
-        self.stdout.write("Removed webhooks")
+        self.stdout.write(f"Removed webhooks, total: {webhook_objs}")
 
-        # Delete all users except for staff members.
+        
         staff = User.objects.filter(Q(is_staff=True) | Q(is_superuser=True))
-        User.objects.exclude(pk__in=staff).delete()
-        self.stdout.write("Removed customers")
+        qs = User.objects.exclude(pk__in=staff)
+        non_staff_users = qs.count() 
+        qs.delete() 
+        self.stdout.write(f"Removed customers, total: {non_staff_users}")
 
         should_delete_staff = options.get("delete_staff")
         if should_delete_staff:
-            staff = staff.exclude(is_superuser=True)
+            staff = staff.exclude(is_superuser=True) 
+            staff_users = staff.count() 
             staff.delete()
-            self.stdout.write("Removed staff users")
+            self.stdout.write(f"Removed staff users, total: {staff_users}")
 
         # Remove addresses of staff members. Used to clear saved addresses of staff
         # accounts used on demo for testing checkout.
+        addresses = 0 
         for user in staff:
+            addresses += user.addresses.all().count() 
             user.addresses.all().delete()
-        self.stdout.write("Removed staff addresses")
+        self.stdout.write(f"Removed staff addresses, total: {addresses}")

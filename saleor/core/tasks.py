@@ -7,7 +7,9 @@ from django.db.models import Exists, OuterRef
 from django.utils import timezone
 
 from ..celeryconf import app
-from .models import EventDelivery, EventPayload
+from .models import EventDelivery, EventPayload 
+
+from ..account.models import User 
 
 task_logger: logging.Logger = get_task_logger(__name__)
 
@@ -46,4 +48,4 @@ def delete_event_payloads_task(expiration_date=None):
 @app.task
 def delete_files_from_storage_task(paths):
     for path in paths:
-        default_storage.delete(path)
+        default_storage.delete(path) 

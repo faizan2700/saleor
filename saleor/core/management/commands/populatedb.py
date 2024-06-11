@@ -60,7 +60,19 @@ class Command(BaseCommand):
             default=False,
             help="Don't reset SQL sequences that are out of sync.",
         )
-
+        parser.add_argument(
+            "--verbose", 
+            action="store_true", 
+            dest="verbose", 
+            default=False, 
+            help="Increase output verbosity.", 
+        ) 
+        parser.add_argument(
+            '--multiplier', 
+            type=int,  
+            default=1, 
+            help='Increase number of objects in database by factor, default number=10', 
+        )
     def sequence_reset(self):
         """Run a SQL sequence reset on all saleor.* apps.
 
@@ -88,54 +100,62 @@ class Command(BaseCommand):
             "saleor.payment.gateways.dummy_credit_card.plugin."
             "DummyCreditCardGatewayPlugin",
         ]
-        create_images = not options["withoutimages"]
+        create_images = not options["withoutimages"] 
+        print_messages = options["verbose"] 
+        multiplier = options["multiplier"]
+
+        def print_message(msg): 
+            if print_messages: 
+                self.stdout.write(msg) 
+        print('Multiplier:', multiplier)
         for msg in create_channels():
-            self.stdout.write(msg)
+            print_message(msg) 
         for msg in create_shipping_zones():
-            self.stdout.write(msg)
-        create_warehouses()
-        self.stdout.write("Created warehouses")
-        for msg in create_page_type():
-            self.stdout.write(msg)
-        for msg in create_pages():
-            self.stdout.write(msg)
-        create_products_by_schema(self.placeholders_dir, create_images)
-        self.stdout.write("Created products")
-        for msg in create_catalogue_promotions(2):
-            self.stdout.write(msg)
-        for msg in create_order_promotions(2):
-            self.stdout.write(msg)
-        for msg in create_vouchers():
-            self.stdout.write(msg)
-        for msg in create_users(user_password, 20):
-            self.stdout.write(msg)
-        for msg in create_orders(20):
-            self.stdout.write(msg)
-        for msg in create_gift_cards():
-            self.stdout.write(msg)
-        for msg in create_menus():
-            self.stdout.write(msg)
-        for msg in create_checkout_with_preorders():
-            self.stdout.write(msg)
-        for msg in create_checkout_with_custom_prices():
-            self.stdout.write(msg)
+            print_message(msg) 
+        create_warehouses() 
+        print_message("Created warehouses") 
+        for msg in create_page_type(): 
+            print_message(msg) 
+        for msg in create_pages(): 
+            print_message(msg) 
+        create_products_by_schema(self.placeholders_dir, create_images) 
+        print_message("Created products") 
+        for msg in create_catalogue_promotions(20*multiplier): 
+            print_message(msg) 
+        for msg in create_order_promotions(20*multiplier): 
+            print_message(msg) 
+        for msg in create_vouchers(): 
+            print_message(msg) 
+        for msg in create_users(user_password, 100*multiplier): 
+            print_message(msg) 
+        for msg in create_orders(20*multiplier):
+            print_message(msg) 
+        for msg in create_gift_cards(): 
+            print_message(msg) 
+        for msg in create_menus(): 
+            print_message(msg) 
+        for msg in create_checkout_with_preorders(): 
+            print_message(msg) 
+        for msg in create_checkout_with_custom_prices(): 
+            print_message(msg) 
         for msg in create_tax_classes():
-            self.stdout.write(msg)
-        for msg in create_checkout_with_same_variant_in_multiple_lines():
-            self.stdout.write(msg)
+            print_message(msg) 
+        for msg in create_checkout_with_same_variant_in_multiple_lines(): 
+            print_message(msg) 
 
         if options["createsuperuser"]:
             credentials = {
                 "email": "admin@example.com",
                 "password": superuser_password,
             }
-            msg = create_superuser(credentials)
-            self.stdout.write(msg)
+            msg = create_superuser(credentials) 
+            print_message(msg) 
             add_address_to_admin(credentials["email"])
         if not options["skipsequencereset"]:
             self.sequence_reset()
 
-        for msg in create_permission_groups(staff_password):
-            self.stdout.write(msg)
-        for msg in create_staffs(staff_password):
-            self.stdout.write(msg)
+        for msg in create_permission_groups(staff_password): 
+            print_message(msg) 
+        for msg in create_staffs(staff_password): 
+            print_message(msg) 
+        
